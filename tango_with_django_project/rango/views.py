@@ -15,4 +15,4 @@ def index(request):
 
 
 def about(request):
-    return HttpResponse("Rango says this is the about page, put together by Pavel Dikov, of the matric number 2070616. <a href='/rango/'>Index</a>")
+    return render(request, 'rango/about.html')
