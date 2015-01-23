@@ -30,11 +30,13 @@ def populate():
 
     add_page(cat=django_cat,
         title="Django Rocks",
-        url="http://www.djangorocks.com/")
+        url="http://www.djangorocks.com/",
+		views=1000)
 
     add_page(cat=django_cat,
         title="How to Tango with Django",
-        url="http://www.tangowithdjango.com/")
+        url="http://www.tangowithdjango.com/",
+		views=1000)
 
     frame_cat = add_cat("Other Frameworks", 32, 16)
 
@@ -50,11 +52,13 @@ def populate():
 
     add_page(cat=student_cat,
         title="github",
-        url="https://github.com/2070616d")
+        url="https://github.com/2070616d",
+		views=1001)
 
     add_page(cat=student_cat,
         title="pythonanywhere",
-        url="https://www.pythonanywhere.com/user/2070616d/")
+        url="https://www.pythonanywhere.com/user/2070616d/",
+		views=1001)
 
     # Print out what we have added to the user.
     for c in Category.objects.all():
