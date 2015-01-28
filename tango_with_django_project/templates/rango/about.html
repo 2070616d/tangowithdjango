@@ -1,17 +1,13 @@
-<!DOCTYPE html>
+{% extends 'rango/base.html' %}
+
 {% load staticfiles %}
-<html>
 
-    <head>
-        <title>Rango</title>
-    </head>
+{% block title %}Aboot{% endblock %}
 
-    <body>
+{% block body_block %}
         <h1>Rango says...</h1>
         this is the about page, put together by Pavel Dikov, of the matric number 2070616<br />
-        <a href="/rango/">index</a><br />
-		
-        <img src="{% static "images/ThisPictureIsAgainstTheLaw.jpg" %}" alt="Picture of a thing that is not to be depicted" />
-    </body>
+        <a href="{% url 'index' %}">index</a><br />
 
-</html>
+        <img src="{% static "images/ThisPictureIsAgainstTheLaw.jpg" %}" alt="Picture of a thing that is not to be depicted" />
+{% endblock %}
