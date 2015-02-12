@@ -7,7 +7,7 @@
 {% block body_block %}
         <h1>Rango says...</h1>
         this is the about page, put together by Pavel Dikov, of the matric number 2070616<br />
-        <a href="{% url 'index' %}">index</a><br />
+        this page was viewed <strong>{{ visits }} times</strong><br />
 
         <img src="{% static "images/ThisPictureIsAgainstTheLaw.jpg" %}" alt="Picture of a thing that is not to be depicted" />
 {% endblock %}

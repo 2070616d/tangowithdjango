@@ -106,3 +106,5 @@ PASSWORD_HASHERS = (
 )
 
 LOGIN_URL = '/rango/login/'
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
