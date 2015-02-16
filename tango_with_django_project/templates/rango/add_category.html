@@ -6,7 +6,7 @@
 
 {% block body_block %}
         {% if user.is_authenticated %}
-            <h1>Add a Category</h1>
+            <h2 class="form-signin-heading">Add a Category</h1>
 
             <form id="category_form" method="post" action="{% url 'add_category' %}">
 
@@ -21,7 +21,8 @@
                     {{ field }}
                 {% endfor %}
 
-                <input type="submit" name="submit" value="Create Category" />
+
+            <button class="btn btn-primary" type="submit" name="submit">Create category</button>
             </form>
         {% else %}
             You cannot access this as you are not logged in.
