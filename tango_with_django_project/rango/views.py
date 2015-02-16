@@ -6,6 +6,7 @@ from rango.models import Category
 from rango.forms import CategoryForm
 from rango.forms import PageForm
 from rango.forms import UserForm, UserProfileForm
+from rango.bing_search import run_query
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect, HttpResponse
@@ -121,6 +122,19 @@ def restricted(request):
 #     return render(request,
 #             'rango/register.html',
 #             {'user_form': user_form, 'profile_form': profile_form, 'registered': registered} )
+
+def search(request):
+
+    result_list = []
+
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+
+        if query:
+            # Run our Bing function to get the results list!
+            result_list = run_query(query)
+
+    return render(request, 'rango/search.html', {'result_list': result_list})
 
 def add_page(request, category_name_slug):
     if not request.user.is_authenticated():
