@@ -2,7 +2,7 @@ from datetime import datetime
 from django.shortcuts import render
 from django.http import HttpResponse
 from rango.models import Page
-from rango.models import Category
+from rango.models import Category, UserProfile
 from rango.forms import CategoryForm
 from rango.forms import PageForm
 from rango.forms import UserForm, UserProfileForm
@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 # Use the login_required() decorator to ensure only those logged in can access the view.
 # @login_required
@@ -122,6 +123,22 @@ def restricted(request):
 #     return render(request,
 #             'rango/register.html',
 #             {'user_form': user_form, 'profile_form': profile_form, 'registered': registered} )
+
+def track_url(request):
+    page_id = None
+    url = '/rango/'
+    if request.method == 'GET':
+        if 'page_id' in request.GET:
+            page_id = request.GET['page_id']
+            try:
+                page = Page.objects.get(id=page_id)
+                page.views = page.views + 1
+                page.save()
+                url = page.url
+            except:
+                pass
+
+    return redirect(url)
 
 def search(request):
 
@@ -240,7 +257,7 @@ def category(request, category_name_slug):
 
         # Retrieve all of the associated pages.
         # Note that filter returns >= 1 model instance.
-        pages = Page.objects.filter(category=category)
+        pages = Page.objects.filter(category=category).order_by('-views')
 
         # Adds our results list to the template context under name pages.
         context_dict['pages'] = pages
@@ -251,6 +268,15 @@ def category(request, category_name_slug):
         # We get here if we didn't find the specified category.
         # Don't do anything - the template displays the "no category" message for us.
         pass
+
+        result_list = []
+
+    if request.method == 'POST':
+        query = request.POST['query'].strip()
+
+        if query:
+            # Run our Bing function to get the results list!
+            context_dict['result_list'] = run_query(query)
 
     # Go render the response and return it to the client.
     return render(request, 'rango/category.html', context_dict)
@@ -265,3 +291,101 @@ def about(request):
 
     # remember to include the visit data
     return render(request, 'rango/about.html', {'visits': count})
+
+def register_profile(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You cannot do this as you are not logged in.")
+
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST)
+
+        # Have we been provided with a valid form?
+        if form.is_valid():
+            # Save the new category to the database.
+            profile = form.save(commit=False)
+            profile.user = request.user
+            # Did the user provide a profile picture?
+            # If so, we need to get it from the input form and put it in the UserProfile model.
+            if 'picture' in request.FILES:
+                profile.picture = request.FILES['picture']
+
+            # Now we save the UserProfile model instance.
+            profile.save()
+
+            # Now call the index() view.
+            # The user will be shown the homepage.
+            return index(request)
+        else:
+            # The supplied form contained errors - just print them to the terminal.
+            print form.errors
+    else:
+        # If the request was not a POST, display the form to enter details.
+        form = UserProfileForm()
+
+    # Bad form (or form details), no form supplied...
+    # Render the form with error messages (if any).
+    return render(request, 'registration/profile_registration.html', {'form': form})
+
+def profile(request):
+    if not request.user.is_authenticated():
+        return HttpResponse("You cannot do this as you are not logged in.")
+
+    context_dict = {}
+    uprofile = UserProfile.objects.get(user = request.user)
+
+    # A HTTP POST?
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST)
+        form.fields['website'].initial = uprofile.website
+        context_dict['form'] = form
+        context_dict['picture'] = uprofile.picture
+
+        # Have we been provided with a valid form?
+        if form.is_valid():
+            # Save the new category to the database.
+            newprofile = form.save(commit=False)
+            newprofile.user = request.user
+            # Did the user provide a profile picture?
+            # If so, we need to get it from the input form and put it in the UserProfile model.
+            if 'picture' in request.FILES:
+                newprofile.picture = request.FILES['picture']
+
+            # Now we save the UserProfile model instance.
+            try:
+                newprofile.save()
+            except:
+                uprofile.delete()
+                newprofile.save()
+
+            return index(request)
+        else:
+            # The supplied form contained errors - just print them to the terminal.
+            print form.errors
+    else:
+        # If the request was not a POST, display the form to enter details.
+        form = UserProfileForm()
+        form.fields['website'].initial = uprofile.website
+        context_dict['form'] = form
+        context_dict['picture'] = uprofile.picture
+
+    # Bad form (or form details), no form supplied...
+    # Render the form with error messages (if any).
+    return render(request, 'rango/profile.html', context_dict)
+
+
+def otherprofile(request, username):
+    if username == request.user.username:
+        return profile(request)
+
+    context_dict = {}
+    try:
+        user = User.objects.get(username=username)
+    except:
+        return HttpResponse("No such username")
+    uprofile = UserProfile.objects.get(user = user)
+    context_dict['username'] = username
+    context_dict['email'] = user.email
+    context_dict['website'] = uprofile.website
+    context_dict['picture'] = uprofile.picture
+    return render(request, 'rango/otherprofile.html', context_dict)
