@@ -271,8 +271,8 @@ def category(request, category_name_slug):
 
         result_list = []
 
-    if request.method == 'POST':
-        query = request.POST['query'].strip()
+    if request.method == 'POST' and request.POST.get('query') is not None:
+        query = request.POST.get('query').strip()
 
         if query:
             # Run our Bing function to get the results list!
